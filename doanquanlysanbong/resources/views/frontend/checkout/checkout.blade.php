@@ -307,14 +307,25 @@
 
                 var order_coupon=$('.order_coupon').val();
                 var _token=$('input[name="_token"]').val();
+                swal("Thành công", "Bạn đã đặt sân thành công hãy đến đúng giờ", "success");
                 $.ajax({
                     url: '{{ url('/confirm_order') }}',
                     method:'POST',
-                    data: {shipping_name:shipping_name,shipping_address:shipping_address,shipping_email:shipping_email,
-                        shipping_phone:shipping_phone,shipping_notes:shipping_notes,order_coupon:order_coupon,_token:_token,shipping_method:shipping_method},
-                    success: function () {
-                        swal("Thành công", "Bạn đã đặt sân thành công hãy đến đúng giờ", "success");
-
+                    data: {
+                        shipping_name:shipping_name,
+                        shipping_address:shipping_address,
+                        shipping_email:shipping_email,
+                        shipping_phone:shipping_phone,
+                        shipping_notes:shipping_notes,
+                        order_coupon:order_coupon,
+                        _token:_token,
+                        shipping_method:shipping_method
+                    },
+                    dataType: 'JSON',
+                    success: function (data) {
+                        if (data) {
+                            window.location.replace(data);
+                        }
                     }
                 });
                 window.setTimeout(() => {

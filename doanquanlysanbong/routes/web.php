@@ -61,6 +61,7 @@ Route::get('/logout_checkout', [CheckoutController::class, 'logout_checkout'])->
 Route::post('/savecheckout_customer', [CheckoutController::class, 'savecheckout_customer'])->name(('savecheckout_customer'));
 Route::get('/payment', [CheckoutController::class, 'payment'])->name(('payment'));
 Route::post('/confirm_order', [CheckoutController::class, 'confirm_order'])->name(('confirm_order'));
+Route::get('/payment-success', [CheckoutController::class, 'paymentSuccess'])->name(('payment-success'));
 
 Route::get('/danhmucbaiviet/{slug}', [FrontendPostController::class, 'danhmucbaiviet'])->name('danhmucbaiviet');
 Route::get('/baiviet/{slug}', [FrontendPostController::class, 'baiviet'])->name('baiviet');
@@ -202,5 +203,6 @@ Route::post('/checktinhtrang', [FrontendController::class, 'checktinhtrang'])->n
 Route::post('/loadcomment', [FrontendController::class, 'loadcomment'])->name('loadcomment');
 Route::post('/sendcomment', [CommentController::class, 'sendcomment'])->name('sendcomment');
 
+Route::post('/get-order-details', [FrontendController::class, 'getOrderDetails'])->name('get-order-details');
 
 

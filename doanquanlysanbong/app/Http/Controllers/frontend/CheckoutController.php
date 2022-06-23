@@ -22,10 +22,8 @@ use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
-
     public function confirm_order(Request $request)
     {
-
         $data = $request->all();
         $shipping = new Shipping();
         $shipping->shipping_name = $data['shipping_name'];
@@ -60,9 +58,35 @@ class CheckoutController extends Controller
             $order_details->save();
         }
         Session::forget('coupon');
-        \Cart::clear();
 
+        if ($data['shipping_method'] == "2") {
+            $data1 = $this->paymentVnpay([
+                'order_id' => $order->id,
+                'amount' => Cart::getTotal(),
+            ]);
+            Cart::clear();
+            return response()->json($data1);
+        }
+
+        Cart::clear();
     }
+
+    public function paymentSuccess(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $order = Order::find($data['vnp_TxnRef']);
+            $order->update([
+                'order_status' => 3,
+            ]);
+            \Cart::clear();
+
+            return redirect()->route('home')->with('message', 'Thanh toán đặt sân thành công!');
+        } catch (\Exception $e) {
+            return redirect()->route('home')->with('message', 'Có lỗi xảy ra!');
+        }
+    }
+
     public function login_checkout()
     {
         $postcategory=PostCategory::all();
@@ -153,7 +177,6 @@ class CheckoutController extends Controller
     }
     public function order_place(Request $request)
     {
-
         $data = array();
         $data['payment_method'] = $request->payment_option;
         $data['payment_status'] = 'Đang chờ xử lý';
@@ -239,5 +262,66 @@ class CheckoutController extends Controller
         }else{
             return redirect('quenmatkhau')->with('message','Vui lòng nhập lại email vì link đã quá hạn');
         }
+    }
+
+    // create link thanh toán VNPay
+    public function paymentVnpay($data_payment)
+    {
+        $vnp_TmnCode = env('VNP_TMNCODE'); //Mã website tại VNPAY 
+        $vnp_HashSecret = env('VNP_HASH_SECRET'); //Chuỗi bí mật
+        $vnp_Url = env('VNP_URL');
+        $vnp_Returnurl = env('VNP_RETURN_URL');
+
+        $vnp_TxnRef = $data_payment['order_id']; //Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
+        $vnp_OrderInfo ='Thanh toán bảo hiểm Medici Pro.';
+        $vnp_OrderType = 'other';
+        $vnp_Amount = $data_payment['amount']*100;
+        $vnp_Locale = 'vn';
+        $vnp_BankCode = '';
+        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+        );
+
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+        
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+
+        $returnData = array('code' => '00'
+            , 'message' => 'success'
+            , 'data' => $vnp_Url);
+        return $vnp_Url;
     }
 }
