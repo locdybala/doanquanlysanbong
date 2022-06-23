@@ -70,11 +70,15 @@
 
                     <li><a href="{{ route('all_pricepitch') }}"><i class="ti-calendar"></i> Quản lý giá theo khung
                             giờ</a></li>
-
+                            
+                    <li><a href="{{ route('all_comment') }}"><i class="ti-calendar"></i> Bình luận</a></li>
                     <li><a href="{{ route('all_pitch') }}"><i class="ti-calendar"></i> Quản lý sân bóng</a></li>
+                    
                     <li><a href="{{ route('manageorder') }}"><i class="ti-calendar"></i> Quản lý đặt sân</a></li>
+                    @hasrole('admin')
                     <li><a href="{{ route('managecoupon') }}"><i class="ti-calendar"></i> Quản lý mã giảm giá</a>
                     </li>
+                    @endhasrole
                     @impersonate
                         <li><a href="{{ route('impersonate_destroy') }}"><i class="ti-calendar"></i> Stop chuyển
                                 quyền</a></li>

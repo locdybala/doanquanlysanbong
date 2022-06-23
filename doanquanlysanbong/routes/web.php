@@ -170,6 +170,12 @@ Route::prefix('admin')->group(function () {
         Route::post('/updatePost/{id}', [PostController::class, 'update'])->name('update_Post')->middleware('auth');
         Route::get('/deletePost/{id}', [PostController::class, 'delete'])->name('deletePost')->middleware('auth');
     });
+    Route::prefix('comment')->group(function () {
+        Route::get('/all_comment', [CommentController::class, 'index'])->name('all_comment')->middleware('auth');
+        Route::post('/allow_comment', [CommentController::class, 'allow_comment'])->name('allow_comment')->middleware('auth');
+       
+        
+    });
     Route::prefix('gallery')->group(function () {
         Route::get('/add_gallery/{id}', [GalleryController::class, 'create'])->name('add_gallery')->middleware('auth');
        Route::post('/select_gallery',[GalleryController::class,'select_gallery'])->name('select_gallery');

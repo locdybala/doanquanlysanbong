@@ -10,4 +10,7 @@ class Comment extends Model
     protected $guarded = [];
 
     use HasFactory;
+    public function pitch(){
+        return $this->belongsTo(Pitch::class,'product_id');
+    }
 }
