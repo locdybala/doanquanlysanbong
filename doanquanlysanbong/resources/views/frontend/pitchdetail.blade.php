@@ -82,24 +82,21 @@
                             <input type="date" id="ngaysudung" name="ngay_dat" value="<?php echo date('Y-m-d'); ?>"
                                 class="form-control" id="">
 
-                            <div style="display: flex">
+                            <div style="display: flex" id="order-details">
                                 @php
                                     $i = 1;
                                 @endphp
                                 @foreach ($pitchprice as $pitch)
-                                    <div class="form_check" id="form_check{{ $i++ }}"
-                                        style="background-color: rgb(6, 199, 6) ; width:120px;height:120px;margin:5px;"
-                                        class="form-check">
-                                        <input class="form-check-input" style="margin-bottom:20px;" type="checkbox"
+                                    <div id="form_check{{ $i++ }}" style="width:120px;height:120px;margin:5px;" class="form-check 
+                                        {{ ($pitch->status == 'Hết sân') ? 'bg-red' : 'bg-green' }}">
+                                        <input class="form-check-input" {{ ($pitch->status == 'Hết sân') ? 'hidden' : '' }} style="margin-bottom:20px;" type="checkbox"
                                             name="pitch_prices_id" value="{{ $pitch->id }}" id="flexCheckDefault">
                                         <br>
                                         <div style="font-size: 16px">
-
                                             <h2 class="timeframe">{{ $pitch->timeframe }}</h2>
-                                            <p id="type">Còn trống</p>
+                                            <p id="type">{{ $pitch->status }}</p>
                                             <p>{{ $pitch->price }}</p>
                                         </div>
-                                        </label>
                                     </div>
                                 @endforeach
                             </div>
@@ -303,51 +300,97 @@
                     }
                 });
             }
-            loaddata();
+            // loaddata();
 
             function loaddata() {
+                // $('.timeframe').each(function() {
+                //     var ngaysudung = $('#ngaysudung').val();
+                //     var pitchid_hidden = $('#pitchid_hidden').val();
+                //     var timeframe = $(this).text();
+                //     var i = 1;
+                //     var _token = $('input[name="_token"]').val();
 
+                //     $.ajax({
+                //         url: '{{ url('/checktinhtrang') }}',
+                //         method: 'POST',
+                //         data: {
+                //             timeframe: timeframe,
+                //             ngaysudung: ngaysudung,
+                //             _token: _token,
+                //             pitchid_hidden: pitchid_hidden,
+                //         },
+                //         dataType: "JSON",
+                //         success: function(data) {
+                //             if (data == 1) {
+                //                 document.getElementById('form_check1').style.background =
+                //                     'rgb(6, 199, 6)';
+                //                 document.getElementById('form_check2').style.background = 'red';
+                //             } else if (data == 0) {
+                //                 document.getElementById('form_check1').style.background =
+                //                     'rgb(6, 199, 6)';
+                //                 document.getElementById('form_check2').style.background =
+                //                     'rgb(6, 199, 6)';
+                //             }
 
-                $('.timeframe').each(function() {
+                //         }
+                //     });
+                // });
+                
+                $('.form-check').remove();
 
-                    var ngaysudung = $('#ngaysudung').val();
-                    var pitchid_hidden = $('#pitchid_hidden').val();
-                    var timeframe = $(this).text();
-                    var i = 1;
-                    var _token = $('input[name="_token"]').val();
-                    $.ajax({
-                        url: '{{ url('/checktinhtrang') }}',
-                        method: 'POST',
-                        data: {
-                            timeframe: timeframe,
-                            ngaysudung: ngaysudung,
-                            _token: _token,
-                            pitchid_hidden: pitchid_hidden,
-                        },
-                        dataType: "JSON",
-                        success: function(data) {
-                            if (data == 1) {
-                                document.getElementById('form_check1').style.background =
-                                    'rgb(6, 199, 6)';
-                                document.getElementById('form_check2').style.background = 'red';
-                            } else if (data == 0) {
-                                document.getElementById('form_check1').style.background =
-                                    'rgb(6, 199, 6)';
-                                document.getElementById('form_check2').style.background =
-                                    'rgb(6, 199, 6)';
+                var ngaysudung = $('#ngaysudung').val();
+                var pitchid_hidden = $('#pitchid_hidden').val();
+                // var timeframe = $(this).text();
+                // var i = 1;
+                var _token = $('input[name="_token"]').val();
+                $.ajax({
+                    url: '{{ url('/get-order-details') }}',
+                    method: 'POST',
+                    data: {
+                        // timeframe: timeframe,
+                        ngaysudung: ngaysudung,
+                        _token: _token,
+                        pitchid_hidden: pitchid_hidden,
+                    },
+                    dataType: "JSON",
+                    success: function(data) {
+                        console.log(data);
+                            var html = '';
+                        $.each(data, function( key, value ) {
+                            var bg = '';
+                            var hidden = '';
+                            if (value.status == 'Hết sân') {
+                                bg = 'bg-red';
+                                hidden = 'hidden';
                             }
+                            else {
+                                bg = 'bg-green';
+                                hidden = '';
+                            }
+                            html += `
+                                <div style="width:120px;height:120px;margin:5px;" class="form-check 
+                                    ${bg}">
+                                    <input class="form-check-input" ${hidden} style="margin-bottom:20px;" type="checkbox"
+                                        name="pitch_prices_id" value="${value.id}" id="flexCheckDefault">
+                                    <br>
+                                    <div style="font-size: 16px">
+                                        <h2 class="timeframe">${value.timeframe}</h2>
+                                        <p id="type">${value.status}</p>
+                                        <p>${value.price}</p>
+                                    </div>
+                                </div>`;
+                        });
 
-                        }
-                    });
+                        $(`#order-details`).append(html);
+
+                    }
                 });
-                // var timeframe = $('.timeframe').val();
-
-
             }
+
             $('#ngaysudung').change(function() {
                 loaddata();
-
             });
+
             var sync1 = $("#sync1 ");
             var sync2 = $("#sync2 ");
             var slidesPerPage = 4;

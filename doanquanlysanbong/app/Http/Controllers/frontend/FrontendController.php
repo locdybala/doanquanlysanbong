@@ -39,7 +39,17 @@ class FrontendController extends Controller
         ->join('categories','pitches.idCategory','=','categories.id')
         ->join('pitch_prices','pitch_prices.idCategory','=','categories.id')
         ->where('pitches.id',$id)->get();
+
         foreach($pitchprice as $key =>$value){
+            foreach($pitchdetail->orderDetails as $order_detail) {
+                if ($order_detail->pitch_date == date('Y-m-d') && $value->timeframe == $order_detail->pitch_timeframe) {
+                    $pitchprice[$key]->status = 'Hết sân';
+                    break;
+                }
+                else {
+                    $pitchprice[$key]->status = 'Còn trống';
+                }
+            }
             $category_id=$value->idCategory;
         }
         $related_pitch=DB::table('pitches')
@@ -106,5 +116,30 @@ class FrontendController extends Controller
         </li>';
         }
         echo $output;
+    }
+
+    public function getOrderDetails(Request $request){
+        $data = $request->all();
+        $ngaysudung = $data['ngaysudung'];
+        $pitchid_hidden = $data['pitchid_hidden'];
+        $pitchdetail=Pitch::find($pitchid_hidden);
+        $pitchprice=DB::table('pitches')
+        ->join('categories','pitches.idCategory','=','categories.id')
+        ->join('pitch_prices','pitch_prices.idCategory','=','categories.id')
+        ->where('pitches.id',$pitchid_hidden)->get();
+
+        foreach($pitchprice as $key =>$value){
+            foreach($pitchdetail->orderDetails->where('pitch_date', $ngaysudung) as $order_detail) {
+                if ($order_detail->pitch_date == $ngaysudung && $value->timeframe == $order_detail->pitch_timeframe) {
+                    $pitchprice[$key]->status = 'Hết sân';
+                    break;
+                }
+                else {
+                    $pitchprice[$key]->status = 'Còn trống';
+                }
+            }
+        }
+
+        return response()->json($pitchprice);
     }
 }

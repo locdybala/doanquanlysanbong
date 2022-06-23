@@ -1519,3 +1519,11 @@ textarea.form-control {
         font-size: 1.5rem;
     }
 }
+
+.bg-green {
+    background-color: rgb(6, 199, 6);
+}
+
+.bg-red {
+    background-color: rgb(244 67 54);
+}

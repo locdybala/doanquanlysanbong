@@ -16,4 +16,8 @@ class Pitch extends Model
         return $this->belongsTo(Category::class, 'idCategory');
     }
     
+    public function orderDetails()
+    {
+    	return $this->hasMany(Order_detail::class);
+    }
 }

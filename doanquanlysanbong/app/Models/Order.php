@@ -10,5 +10,4 @@ class Order extends Model
     protected $guarded = [];
 
     use HasFactory;
-    
 }
