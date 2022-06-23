@@ -41,6 +41,7 @@ class FrontendController extends Controller
         ->where('pitches.id',$id)->get();
 
         foreach($pitchprice as $key =>$value){
+            $pitchprice[$key]->status = 'Còn trống';
             foreach($pitchdetail->orderDetails as $order_detail) {
                 if ($order_detail->pitch_date == date('Y-m-d') && $value->timeframe == $order_detail->pitch_timeframe) {
                     $pitchprice[$key]->status = 'Hết sân';
@@ -126,9 +127,10 @@ class FrontendController extends Controller
         $pitchprice=DB::table('pitches')
         ->join('categories','pitches.idCategory','=','categories.id')
         ->join('pitch_prices','pitch_prices.idCategory','=','categories.id')
-        ->where('pitches.id',$pitchid_hidden)->get();
+        ->where('pitches.id',$pitchid_hidden)->get()->toArray();
 
         foreach($pitchprice as $key =>$value){
+            $pitchprice[$key]->status = 'Còn trống';
             foreach($pitchdetail->orderDetails->where('pitch_date', $ngaysudung) as $order_detail) {
                 if ($order_detail->pitch_date == $ngaysudung && $value->timeframe == $order_detail->pitch_timeframe) {
                     $pitchprice[$key]->status = 'Hết sân';
